@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic-Tac-Toe</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Tic-Tac-Toe </h1>
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+        <button id="restart">Restart Game</button>
+        <p id="status"></p>
+        <label>
+            Play Against AI:
+            <input type="checkbox" id="aiMode" />
+        </label>
+    </div>
+    <script>
+        const board = document.getElementById('board');
+const cells = document.querySelectorAll('.cell');
+const statusDisplay = document.getElementById('status');
+const restartButton = document.getElementById('restart');
+const aiModeCheckbox = document.getElementById('aiMode');
+
+let currentPlayer = 'X';
+let gameActive = true;
+let boardState = ['', '', '', '', '', '', '', '', ''];
+
+const winningConditions = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+];
+
+function handleCellClick(event) {
+    const clickedCell = event.target;
+    const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+    if (boardState[clickedCellIndex] !== '' || !gameActive) {
+        return;
+    }
+
+    updateCell(clickedCell, clickedCellIndex);
+
+    if (aiModeCheckbox.checked && gameActive && currentPlayer === 'O') {
+        setTimeout(aiMove, 500); // AI move delay for better user experience
+    }
+}
+
+function updateCell(cell, index) {
+    boardState[index] = currentPlayer;
+    cell.textContent = currentPlayer;
+    cell.style.color = currentPlayer === 'X' ? '#007bff' : '#dc3545';
+
+    checkResult();
+}
+
+function aiMove() {
+    const emptyCells = boardState.map((val, index) => (val === '' ? index : null)).filter(val => val !== null);
+    if (emptyCells.length === 0 || !gameActive) return;
+
+    const randomIndex = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+    const aiCell = cells[randomIndex];
+
+    updateCell(aiCell, randomIndex);
+}
+
+function checkResult() {
+    let roundWon = false;
+
+    for (let i = 0; i < winningConditions.length; i++) {
+        const condition = winningConditions[i];
+        const a = boardState[condition[0]];
+        const b = boardState[condition[1]];
+        const c = boardState[condition[2]];
+
+        if (a === '' || b === '' || c === '') {
+            continue;
+        }
+        if (a === b && b === c) {
+            roundWon = true;
+            break;
+        }
+    }
+
+    if (roundWon) {
+        statusDisplay.textContent = `${currentPlayer} has won! 🎉`;
+        gameActive = false;
+        return;
+    }
+
+    if (!boardState.includes('')) {
+        statusDisplay.textContent = `It's a draw! 🤝`;
+        gameActive = false;
+        return;
+    }
+
+    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    statusDisplay.textContent = `It's ${currentPlayer}'s turn.`;
+}
+
+function handleRestartGame() {
+    currentPlayer = 'X';
+    gameActive = true;
+    boardState = ['', '', '', '', '', '', '', '', ''];
+    statusDisplay.textContent = `It's ${currentPlayer}'s turn.`;
+
+    cells.forEach(cell => {
+        cell.textContent = '';
+        cell.style.color = '#333';
+    });
+}
+
+cells.forEach(cell => {
+    cell.addEventListener('click', handleCellClick);
+});
+
+restartButton.addEventListener('click', handleRestartGame);
+statusDisplay.textContent = `It's ${currentPlayer}'s turn.`;
+
+    </script>
+</body>
+</html>
